@@ -29,7 +29,7 @@ public class CurrencyController {
     @GetMapping
     public ResponseEntity<GenericResponse<List<Currency>>> getAllCurrencies() {
         List<Currency> currencies = currencyService.getAllCurrencies();
-        return ResponseEntity.ok(new GenericResponse<>(200, currencies));
+        return ResponseEntity.ok(new GenericResponse<>(200,"Success", currencies));
     }
 
     @Operation(summary = "Add a new currency to track")
@@ -37,10 +37,10 @@ public class CurrencyController {
     public ResponseEntity<GenericResponse<?>> addCurrency(@RequestParam String code) {
         try {
             Currency currency = currencyService.addCurrency(code.toUpperCase());
-            return ResponseEntity.ok(new GenericResponse<>(200, currency));
+            return ResponseEntity.ok(new GenericResponse<>(200,"Success", currency));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
-                    .body(new GenericResponse<>(400, e.getMessage()));
+                    .body(new GenericResponse<>(400,"Error", e.getMessage()));
         }
     }
     

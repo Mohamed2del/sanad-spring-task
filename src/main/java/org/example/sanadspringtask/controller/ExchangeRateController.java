@@ -26,12 +26,21 @@ public class ExchangeRateController {
     @Operation(summary = "Get exchange rate for a specific currency", description = "Returns the latest exchange rate for the given currency code (e.g., EGP, EUR, SAR) based on USD")
     @GetMapping("/{currency}")
     public ResponseEntity<GenericResponse<ExchangeRateResponse>> getRate(@PathVariable String currency) {
-        Double rate = exchangeRateCache.getRate(currency.toUpperCase());
+        String upperCaseCurrency = currency.toUpperCase();
+        Double rate = exchangeRateCache.getRate(upperCaseCurrency);
+        
         if (rate == null) {
+            // Check if the currency exists in the database but has no rate yet
+            boolean isTrackedCurrency = exchangeRateCache.isTrackedCurrency(upperCaseCurrency);
+            String message = isTrackedCurrency 
+                ? "Exchange rate not available yet. Please try again later."
+                : "Currency code not found or not supported.";
+            
             return ResponseEntity.status(404)
-                    .body(new GenericResponse<>(404, null));
+                    .body(new GenericResponse<ExchangeRateResponse>(404, message, null));
         }
-        ExchangeRateResponse response = new ExchangeRateResponse(currency.toUpperCase(), rate);
-        return ResponseEntity.ok(new GenericResponse<>(200, response));
+        
+        ExchangeRateResponse response = new ExchangeRateResponse(upperCaseCurrency, rate);
+        return ResponseEntity.ok(new GenericResponse<ExchangeRateResponse>(200, "Success", response));
     }
 }
