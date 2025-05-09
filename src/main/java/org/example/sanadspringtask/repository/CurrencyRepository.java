@@ -1,2 +1,10 @@
-package org.example.sanadspringtask.repository;public interface CurrencyRepository {
+package org.example.sanadspringtask.repository;
+
+import org.example.sanadspringtask.model.Currency;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface CurrencyRepository extends JpaRepository<Currency, Long> {
+    Optional<Currency> findByCode(String code);
 }

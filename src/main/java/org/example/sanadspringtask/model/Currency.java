@@ -1,15 +1,19 @@
-package org.example.sanadspringtask.models;
+package org.example.sanadspringtask.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "currencies")
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
 public class Currency {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,10 +21,8 @@ public class Currency {
 
     private String code;
 
-    public Currency() {}
 
     public Currency(String code) {
-        this.code = code;
+        this.code= code;
     }
-
 }
