@@ -19,4 +19,10 @@ spring:
 openexchangerates:
   app-id: 9156376d5a834a2fb5d01b89f24d98f5
 
-
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    display-request-duration: true
+    operations-sorter: method

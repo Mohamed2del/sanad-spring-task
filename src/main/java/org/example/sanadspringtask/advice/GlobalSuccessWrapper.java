@@ -13,7 +13,9 @@ public class GlobalSuccessWrapper implements ResponseBodyAdvice<Object> {
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        return true;
+        // Don't wrap Swagger or error responses
+        return !returnType.getDeclaringClass().getPackageName().startsWith("org.springdoc")
+                && !returnType.getDeclaringClass().getSimpleName().contains("OpenApi");
     }
 
     @Override
