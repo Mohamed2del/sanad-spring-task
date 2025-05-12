@@ -1,35 +1,18 @@
 package org.example.sanadspringtask.scheduler;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
 
-import org.example.sanadspringtask.cache.ExchangeRateCache;
-import org.example.sanadspringtask.configuration.OpenExchangeRatesConfig;
-import org.example.sanadspringtask.model.Currency;
-import org.example.sanadspringtask.model.ExchangeRateLog;
-import org.example.sanadspringtask.repository.CurrencyRepository;
-import org.example.sanadspringtask.repository.ExchangeRateLogRepository;
+import org.example.sanadspringtask.service.ExchangeRateService;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 @Component
 public class ExchangeRateScheduler {
 
-    private final CurrencyRepository currencyRepository;
-    private final ExchangeRateCache exchangeRateCache;
-    private final RestTemplate restTemplate;
-    private final OpenExchangeRatesConfig config;
-    private final ExchangeRateLogRepository exchangeRateLogRepository;
+    private final ExchangeRateService exchangeRateService;
 
-    public ExchangeRateScheduler(CurrencyRepository currencyRepository, ExchangeRateCache exchangeRateCache, OpenExchangeRatesConfig config, ExchangeRateLogRepository exchangeRateLogRepository) {
-        this.currencyRepository = currencyRepository;
-        this.exchangeRateCache = exchangeRateCache;
-        this.config = config;
-        this.exchangeRateLogRepository = exchangeRateLogRepository;
-        this.restTemplate = new RestTemplate();
+    public ExchangeRateScheduler(ExchangeRateService exchangeRateService) {
+        this.exchangeRateService = exchangeRateService;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -37,28 +20,8 @@ public class ExchangeRateScheduler {
         fetchRates();
     }
 
-    @Scheduled(fixedRate = 3600000 ) // Every hour
+    @Scheduled(fixedRate = 3600000)
     public void fetchRates() {
-        String url = "https://openexchangerates.org/api/latest.json?app_id=" + config.getAppId();
-        Map<String, Object> response = restTemplate.getForObject(url, Map.class);
-        Map<String, Double> rates = (Map<String, Double>) response.get("rates");
-
-        // Get all currencies once outside the loop
-        List<Currency> currencies = currencyRepository.findAll();
-        LocalDateTime timestamp = LocalDateTime.now();
-        
-        // Process each currency in parallel
-        currencies.parallelStream()
-            .forEach(currency -> {
-                String code = currency.getCode();
-                exchangeRateCache.addTrackedCurrency(code);
-                if (rates.containsKey(code)) {
-                    Number rawRate = rates.get(code);
-                    double rate = rawRate.doubleValue();
-                    exchangeRateCache.updateRate(code, rate);
-                    ExchangeRateLog log = new ExchangeRateLog(code, rate, timestamp);
-                    exchangeRateLogRepository.save(log);
-                }
-            });
+        exchangeRateService.fetchAndProcessRates();
     }
 }

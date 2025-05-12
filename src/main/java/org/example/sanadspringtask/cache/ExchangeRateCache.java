@@ -8,19 +8,19 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class ExchangeRateCache {
-    private final Map<String, Double> rateMap = new ConcurrentHashMap<>();
+    private final Map<String, Double> usdRatesMap = new ConcurrentHashMap<>();
     private final Set<String> trackedCurrencies = ConcurrentHashMap.newKeySet();
 
-    public void updateRate(String currencyCode, Double rate) {
-        rateMap.put(currencyCode, rate);
+    public void updateUsdRate(String currencyCode, Double rate) {
+        usdRatesMap.put(currencyCode.toUpperCase(), rate);
     }
 
-    public Double getRate(String currencyCode) {
-        return rateMap.get(currencyCode);
+    public Double getUsdRate(String currencyCode) {
+        return usdRatesMap.get(currencyCode.toUpperCase());
     }
 
-    public Map<String, Double> getAllRates() {
-        return rateMap;
+    public Map<String, Double> getAllUsdRates() {
+        return usdRatesMap;
     }
 
     public void addTrackedCurrency(String currencyCode) {

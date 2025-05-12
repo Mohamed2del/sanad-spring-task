@@ -15,7 +15,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(properties = "spring.flyway.enabled=false")
@@ -36,7 +35,9 @@ class CurrencyControllerIntegrationTest {
 
     @Test
     void shouldAddNewCurrency() throws Exception {
-        mockMvc.perform(post("/api/currencies?code=EGP"))
+        mockMvc.perform(post("/api/currencies")
+                .contentType("application/json")
+                .content("{\"code\":\"EGP\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.result.code").value("EGP"));
@@ -46,10 +47,23 @@ class CurrencyControllerIntegrationTest {
     void shouldRejectDuplicateCurrency() throws Exception {
         currencyRepository.save(new Currency("USD"));
 
-        mockMvc.perform(post("/api/currencies?code=USD"))
+        mockMvc.perform(post("/api/currencies")
+                .contentType("application/json")
+                .content("{\"code\":\"USD\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(400))
                 .andExpect(jsonPath("$.result", containsString("already exists")));
+    }
+
+    @Test
+    void shouldRejectInvalidCurrencyCodeFormat() throws Exception {
+        mockMvc.perform(post("/api/currencies")
+                .contentType("application/json")
+                .content("{\"code\":\"usd\"}")) // lowercase should fail
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(
+                        jsonPath("$.result.code").value("Currency code must be 3 uppercase letters (e.g., USD, SAR)"));
     }
 
     @Test

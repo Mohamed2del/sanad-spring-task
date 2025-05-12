@@ -1,22 +1,17 @@
 package org.example.sanadspringtask.dto;
 
-import java.time.LocalDateTime;
-
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class ExchangeRateResponse {
-    private String currency;
-    private double rate;
-    private String base = "USD";
-    private LocalDateTime timestamp = LocalDateTime.now();
+    private String name;
+    private Map<String, Double> rates;
 
-    public ExchangeRateResponse(String currency, double rate) {
-        this.currency = currency;
-        this.rate = rate;
+    public ExchangeRateResponse(String name, Map<String, Double> rates) {
+        this.name = name;
+        this.rates = rates;
     }
-
-
 }

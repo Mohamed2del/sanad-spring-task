@@ -8,15 +8,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.example.sanadspringtask.service.CurrencyService;
+import org.example.sanadspringtask.service.ExchangeRateService;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class CurrencyServiceTest {
 
     @Mock
     private CurrencyRepository currencyRepository;
+
+    @Mock
+    private ExchangeRateService exchangeRateService;
 
     @InjectMocks
     private CurrencyService currencyService;
@@ -33,8 +38,10 @@ class CurrencyServiceTest {
         when(currencyRepository.save(any())).thenReturn(new Currency(code));
 
         Currency saved = currencyService.addCurrency(code);
+
         assertEquals("EGP", saved.getCode());
         verify(currencyRepository).save(any(Currency.class));
+        verify(exchangeRateService).fetchAndProcessRates();
     }
 
     @Test
@@ -44,5 +51,6 @@ class CurrencyServiceTest {
 
         assertThrows(IllegalArgumentException.class, () -> currencyService.addCurrency(code));
         verify(currencyRepository, never()).save(any());
+        verify(exchangeRateService, never()).fetchAndProcessRates();
     }
 }

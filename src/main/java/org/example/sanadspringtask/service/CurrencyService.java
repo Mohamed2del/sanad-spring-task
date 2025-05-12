@@ -9,9 +9,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class CurrencyService {
     private final CurrencyRepository currencyRepository;
+    private final ExchangeRateService exchangeRateService;
 
-    public CurrencyService(CurrencyRepository currencyRepository) {
+    public CurrencyService(CurrencyRepository currencyRepository,
+            ExchangeRateService exchangeRateService) {
         this.currencyRepository = currencyRepository;
+        this.exchangeRateService = exchangeRateService;
     }
 
     public List<Currency> getAllCurrencies() {
@@ -22,8 +25,9 @@ public class CurrencyService {
         if (currencyRepository.findByCode(code).isPresent()) {
             throw new IllegalArgumentException("Currency code already exists: " + code);
         }
-        return currencyRepository.save(new Currency(code));
+        Currency currency = currencyRepository.save(new Currency(code));
+        exchangeRateService.fetchAndProcessRates();
+        return currency;
     }
-    
-    
+
 }
